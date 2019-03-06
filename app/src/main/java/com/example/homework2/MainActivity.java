@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -47,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
     EditText address;
     @BindView(R.id.submit_button)
     Button submit_button;
+    @BindView(R.id.textInputLayout)
+    TextInputLayout emailWrapper;
+    @BindView(R.id.textInputLayout2)
+    TextInputLayout phoneWrapper;
 
 
     ArrayList<String> ages = new ArrayList<>();
@@ -99,7 +104,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.submit_button)
-    public void startNewActivity(View view) {
+    public void submitButton(View view) {
+        String email = emailWrapper.getEditText().getText().toString();
+        String phone = phoneWrapper.getEditText().getText().toString();
+        
+        if(!validEmail(email)) {
+            emailWrapper.setError("Not a valid email address.");
+        } else if (!validPhone(phone)) {
+            phoneWrapper.setError("Not a valid phone number");
+        } else {
+            emailWrapper.setErrorEnabled(false);
+            phoneWrapper.setErrorEnabled(false);
+            startNewActivity();
+        }
+
+    }
+
+    public void startNewActivity() {
         Intent intent = new Intent(this, MainActivityTwo.class);
         Contact tempContact = new Contact(name.getText().toString(), occupation.getText().toString(), ageDropdown.getSelectedItem().toString(), address.getText().toString(),emailText.getText().toString(), phoneText.getText().toString());
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -114,9 +135,19 @@ public class MainActivity extends AppCompatActivity {
 
         intent.putExtra("contact", tempContact);
         startActivity(intent);
-
     }
 
+
+
+    private boolean validEmail(String email) {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(email);
+        return matcher.find();
+    }
+
+    private boolean validPhone(String phone) {
+        Matcher matcher = VALID_PHONE_NUMBER_REGEX .matcher(phone);
+        return matcher.find();
+    }
 
 
     private void dispatchTakePictureIntent() {
